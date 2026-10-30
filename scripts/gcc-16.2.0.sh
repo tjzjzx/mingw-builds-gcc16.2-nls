@@ -61,6 +61,7 @@ PKG_PATCHES=(
 	gcc/gcc-13-mcf-sjlj-avoid-infinite-recursion.patch
 	gcc/function-honour-over-alignment-in-align_stack_local.patch
 	gcc/return-256-512-bit-vectors-in-registers-x86_64-MS-ABI.patch
+	gcc/gcc-16.2-win32-relocatable-localedir.patch
 )
 
 #
@@ -72,6 +73,9 @@ PKG_CONFIGURE_FLAGS=(
 	#
 	--prefix=$MINGWPREFIX
 	--with-sysroot=$PREFIX
+	# NLS: embed the native Windows path of the install prefix, otherwise the
+	# baked LOCALEDIR never resolves at runtime on Windows (see docs).
+	--localedir=$( [[ $PKG_PRIORITY ]] && cd "$BASE_BUILD_DIR" 2>/dev/null && pwd -W 2>/dev/null || echo "$BASE_BUILD_DIR" )$MINGWPREFIX/share/locale
 	#--with-gxx-include-dir=$MINGWPREFIX/$TARGET/include/c++
 	#
 	$LINK_TYPE_GCC
@@ -123,7 +127,7 @@ PKG_CONFIGURE_FLAGS=(
 	)
 	--disable-rpath
 	--disable-win32-registry
-	--disable-nls
+	--enable-nls
 	--disable-werror
 	--disable-symvers
 	#
@@ -133,7 +137,8 @@ PKG_CONFIGURE_FLAGS=(
 	$PROCESSOR_OPTIMIZATION
 	$PROCESSOR_TUNE
 	#
-	--with-libiconv
+	--with-libiconv-prefix=$PREREQ_DIR/$BUILD_ARCHITECTURE-libiconv-$LINK_TYPE_SUFFIX
+	--with-libintl-prefix=$PREREQ_DIR/$BUILD_ARCHITECTURE-gettext-$LINK_TYPE_SUFFIX
 	--with-system-zlib
 	--with-{gmp,mpfr,mpc,isl}=$PREREQ_DIR/$HOST-$LINK_TYPE_SUFFIX
 	--with-pkgversion="\"$BUILD_ARCHITECTURE-$THREADS_MODEL-$EXCEPTIONS_MODEL${REV_STRING}, $MINGW_W64_PKG_STRING\""

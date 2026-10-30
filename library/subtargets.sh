@@ -51,6 +51,7 @@ function func_get_subtargets {
 				echo zlib; \
 			} \
 		)
+		gettext
 		gmp
 		mpfr
 		mpc
