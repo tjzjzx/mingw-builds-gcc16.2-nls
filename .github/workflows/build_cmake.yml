@@ -5,6 +5,9 @@ on: [push, pull_request]
 env:
   MINGW_BUILDS_GCC_VERSION: "16.2.0"
   MINGW_BUILDS_RT_VERSION: "v14"
+  # Bump when the set of cached directories changes: the cache key has to
+  # change too, otherwise the old (incomplete) entry keeps being restored.
+  PREREQ_CACHE_REV: "2"
 
 jobs:
   download:
@@ -86,7 +89,8 @@ jobs:
           c:/buildroot/prerequisites
           c:/buildroot/prerequisites-build
           c:/buildroot/prerequisites-logs
-        key: prereqs-${{ matrix.arch }}-${{ matrix.threads == 'mcf' && 'mcf' || 'posix' }}-${{ matrix.msvcrt }}-gcc${{ env.MINGW_BUILDS_GCC_VERSION }}-rt${{ env.MINGW_BUILDS_RT_VERSION }}-${{ hashFiles('scripts/**', 'library/**', 'patches/**') }}
+          c:/buildroot/runtime
+        key: prereqs-${{ matrix.arch }}-${{ matrix.threads == 'mcf' && 'mcf' || 'posix' }}-${{ matrix.msvcrt }}-gcc${{ env.MINGW_BUILDS_GCC_VERSION }}-rt${{ env.MINGW_BUILDS_RT_VERSION }}-${{ hashFiles('scripts/**', 'library/**', 'patches/**') }}-r${{ env.PREREQ_CACHE_REV }}
 
     - uses: msys2/setup-msys2@v2
       if: steps.prereq-cache.outputs.cache-hit != 'true'
@@ -149,6 +153,7 @@ jobs:
           c:/buildroot/prerequisites
           c:/buildroot/prerequisites-build
           c:/buildroot/prerequisites-logs
+          c:/buildroot/runtime
 
   build:
     name: ${{ matrix.arch }}-${{ matrix.threads }}-${{ matrix.exceptions }}-${{ matrix.msvcrt }}
@@ -193,7 +198,8 @@ jobs:
           c:/buildroot/prerequisites
           c:/buildroot/prerequisites-build
           c:/buildroot/prerequisites-logs
-        key: prereqs-${{ matrix.arch }}-${{ matrix.threads == 'mcf' && 'mcf' || 'posix' }}-${{ matrix.msvcrt }}-gcc${{ env.MINGW_BUILDS_GCC_VERSION }}-rt${{ env.MINGW_BUILDS_RT_VERSION }}-${{ hashFiles('scripts/**', 'library/**', 'patches/**') }}
+          c:/buildroot/runtime
+        key: prereqs-${{ matrix.arch }}-${{ matrix.threads == 'mcf' && 'mcf' || 'posix' }}-${{ matrix.msvcrt }}-gcc${{ env.MINGW_BUILDS_GCC_VERSION }}-rt${{ env.MINGW_BUILDS_RT_VERSION }}-${{ hashFiles('scripts/**', 'library/**', 'patches/**') }}-r${{ env.PREREQ_CACHE_REV }}
 
     - name: Build
       shell: msys2 {0}
