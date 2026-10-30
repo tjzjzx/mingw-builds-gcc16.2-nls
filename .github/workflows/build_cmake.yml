@@ -112,10 +112,14 @@ jobs:
     # There is no "prerequisites only" switch in ./build, so let it run and cut
     # it off while GCC is compiling. The step timeout keeps the job well under
     # the 6h GitHub-hosted limit; only the markers written by the prerequisites
-    # are cached, the (throwaway) GCC build dir is not.
+    # are cached, the (throwaway) GCC build dir is not. Generous margin over the
+    # measured ~40 min: if the run is slower and the cut lands inside a
+    # prerequisite, the "Check prerequisites are complete" gate below refuses to
+    # cache the half-written state and the next run starts over instead of
+    # resuming from a poisoned cache.
     - name: Build prerequisites
       if: steps.prereq-cache.outputs.cache-hit != 'true'
-      timeout-minutes: 65
+      timeout-minutes: 80
       continue-on-error: true
       shell: msys2 {0}
       run: >-
@@ -200,6 +204,9 @@ jobs:
           c:/buildroot/prerequisites-logs
           c:/buildroot/runtime
         key: prereqs-${{ matrix.arch }}-${{ matrix.threads == 'mcf' && 'mcf' || 'posix' }}-${{ matrix.msvcrt }}-gcc${{ env.MINGW_BUILDS_GCC_VERSION }}-rt${{ env.MINGW_BUILDS_RT_VERSION }}-${{ hashFiles('scripts/**', 'library/**', 'patches/**') }}-r${{ env.PREREQ_CACHE_REV }}
+        # Without the prerequisites this job would rebuild them and die at the
+        # 6h limit; fail in seconds instead.
+        fail-on-cache-miss: true
 
     - name: Build
       shell: msys2 {0}
