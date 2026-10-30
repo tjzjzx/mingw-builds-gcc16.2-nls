@@ -1,5 +1,10 @@
 # GCC 16.2 原生 Windows 工具链构建说明（mingw-builds）
 
+> 个人备份仓库（`tjzjzx/mingw-builds-gcc16.2-nls`）：在 upstream
+> `niXman/mingw-builds@dac115a` 之上叠加了 NLS（libintl）+ iconv 的改动，
+> 仅作自用备份，不向上游提交 PR。
+> 预编译工具链见 [Releases](https://github.com/tjzjzx/mingw-builds-gcc16.2-nls/releases)。
+
 ## 环境
 
 | 项         | 值                                                           |
