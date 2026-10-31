@@ -165,3 +165,27 @@ ls mingw64/x86_64-w64-mingw32/lib/libiconv.a
 
 MSYS2 的 `LANG`/`LC_ALL` 若为 `zh_CN.UTF-8`，gcc 的翻译目录按 `LANGUAGE` /
 `LC_ALL` / `LANG` 顺序查找 `share/locale/<lang>/LC_MESSAGES/gcc.mo`。
+
+## 注意事项：`gcc -v` 的中文输出
+
+正常编译时的本地化消息（`-Wall` 诊断、`fatal error:` 等）走 `WriteConsoleW`，msvcrt 和 UCRT
+两种构建都能正常显示中文。
+
+但 `gcc -v`（以及 `--help` 这类经 `fnotice`/`printf` 输出的内容）走 CRT，受 locale 和控制台
+代码页影响：msvcrt 构建在 CP936 下乱码，UCRT 构建在 CP1252 这类无法表示中文的代码页下会
+静默变成 `?`。
+
+规避方法：
+
+- **cmd**：
+
+  ```bat
+  chcp 65001
+  ```
+
+- **PowerShell（pwsh）**：
+
+  ```powershell
+  [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+  ```
+

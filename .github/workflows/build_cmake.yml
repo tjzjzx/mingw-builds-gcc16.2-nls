@@ -248,4 +248,8 @@ jobs:
       id: upload_to_release
       uses: softprops/action-gh-release@v1
       with:
+        # Only the self-extracting 7z packages produced by --bin-compress
+        # (e.g. x86_64-16.2.0-release-posix-seh-ucrt-rt_v14-rev0.7z);
+        # the extracted directory trees stay in the workflow artifacts.
         files: "*.7z"
+        fail_on_unmatched_files: true
